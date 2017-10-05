@@ -1,4 +1,3 @@
-const metamask = require('metamascara')
 const h = require('virtual-dom/h')
 const treeify = require('treeify').asTree
 const ObsStore = require('obs-store')
@@ -7,28 +6,62 @@ const EthQuery = require('eth-query')
 const EthStore = require('eth-store')
 const EthAbi = require('ethjs-abi')
 const EthBlockTracker = require('eth-block-tracker')
+const dagBin = require('ipld-raw')
 const setupRenderer = require('./setupRenderer')
 const exampleAbi = require('./token.json')
+
+//
+// eth ipfs client START
+//
+
+const createEthIpfsClient = require('eth-ipfs-client')
+const IpfsClient = require('ipfs')
+const ETH_IPFS_BRIDGES = [
+  // '/dns4/ipfs.lab.metamask.io/tcp/443/wss/ipfs/QmdcCVdmHsA1s69GhQZrszpnb3wmtRwv81jojAurhsH9cz',
+  '/dns4/fox.musteka.la/tcp/443/wss/ipfs/Qmc7etyUd9tEa3ZBD3LCTMDL96qcMi8cKfHEiLt5nhVdVC',
+  '/dns4/bat.musteka.la/tcp/443/wss/ipfs/QmPaBC5Lmfj7vctVxRPcKvfZds9Zk96dgjgthvg4Dgf7at',
+  '/dns4/monkey.musteka.la/tcp/443/wss/ipfs/QmZDfxSycZxaaYyrCyHdNEiip3wmxTgriPzEYETEn9Z6K3',
+  '/dns4/panda.musteka.la/tcp/443/wss/ipfs/QmUGARsthjG4EJBCrYzkuCESjn5G2akmmuawKPbZrFM3E5',
+  '/dns4/tiger.musteka.la/tcp/443/wss/ipfs/QmXFdPj3FuVpkgmNHNTFitkp4DSmVuF6HxNX6tCZr4LFz9',
+]
+
+const ipfs = new IpfsClient({
+  // repo: '/tmp/ipfs' + Math.random(),
+  Bootstrap: ETH_IPFS_BRIDGES,
+})
+ipfs.on('ready', start)
+
+// add bin codec for "base2"
+ipfs._ipldResolver.support.add('base2',
+  dagBin.resolver,
+  dagBin.util)
+
+const ethIpfsClient = createEthIpfsClient({ ipfs })
+const { engine, provider, blockTracker, cht, reqTracker } = ethIpfsClient
+
+global.ethIpfsClient = ethIpfsClient
+global.ipfs = ipfs
+
+function start() {
+  console.log('ipfs ready!')
+  // connect to eth-ipfs bridge nodes
+  ETH_IPFS_BRIDGES.map((address) => ipfs.swarm.connect(address))
+  startApp({ provider, blockTracker })
+}
+
+//
+// eth ipfs client END
+//
 
 const defaultState = {
   abi: exampleAbi,
   view: { address: '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07' },
 }
 
-window.addEventListener('load', function() {
-
-  const provider = metamask.createDefaultProvider({})
-  startApp(provider)
-
-})
-
-function startApp(provider){
+function startApp({ provider, blockTracker }){
 
   const ethQuery = global.ethQuery = new EthQuery(provider)
-
-  const blockTracker = new EthBlockTracker({ provider })
   blockTracker.on('block', (block) => console.log('block #'+Number(block.number)))
-  blockTracker.start()
 
   // setup eth-store (blockchain state)
   const ethStore = global.ethStore = new EthStore(blockTracker, provider)
@@ -140,7 +173,7 @@ function subscribeEthStoreToAbi(appState, ethStore) {
     const contractAddress = appState.view.address
     const fromAddress = appState.aux.fromAddress
     const methods = abi.filter((interface) => interface.type === 'function')
-    
+
     // get logs for block
     ethStore.put('logs', (block) => ({
       method: 'eth_getLogs',
@@ -250,7 +283,7 @@ function render(appState, actions){
               })
             ])
           ]),
-          
+
           h('.form-group', [
             h('label .control-label .col-sm-2', {
               for: 'methods1',
