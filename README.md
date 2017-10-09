@@ -1,5 +1,7 @@
 ### development
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/kumavis/udapp-ipfs.svg)](https://greenkeeper.io/)
+
 ```
 git clone git@github.com:kumavis/udapp.git
 cd udapp
