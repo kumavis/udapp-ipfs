@@ -38,8 +38,12 @@ ipfs._ipldResolver.support.add('base2',
   dagBin.resolver,
   dagBin.util)
 
-const ethIpfsClient = createEthIpfsClient({ ipfs })
+const ethIpfsClient = createEthIpfsClient({ ipfs, getAccounts })
 const { engine, provider, blockTracker, cht, reqTracker } = ethIpfsClient
+
+function getAccounts(cb) {
+  cb(null, [])
+}
 
 global.ethIpfsClient = ethIpfsClient
 global.ipfs = ipfs
