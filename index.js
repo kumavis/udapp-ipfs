@@ -17,7 +17,7 @@ const exampleAbi = require('./token.json')
 const createEthIpfsClient = require('eth-ipfs-client')
 const IpfsClient = require('ipfs')
 const ETH_IPFS_BRIDGES = [
-  // '/dns4/ipfs.lab.metamask.io/tcp/443/wss/ipfs/QmdcCVdmHsA1s69GhQZrszpnb3wmtRwv81jojAurhsH9cz',
+  '/dns4/ipfs.lab.metamask.io/tcp/443/wss/ipfs/QmdcCVdmHsA1s69GhQZrszpnb3wmtRwv81jojAurhsH9cz',
   '/dns4/fox.musteka.la/tcp/443/wss/ipfs/Qmc7etyUd9tEa3ZBD3LCTMDL96qcMi8cKfHEiLt5nhVdVC',
   '/dns4/bat.musteka.la/tcp/443/wss/ipfs/QmPaBC5Lmfj7vctVxRPcKvfZds9Zk96dgjgthvg4Dgf7at',
   '/dns4/monkey.musteka.la/tcp/443/wss/ipfs/QmZDfxSycZxaaYyrCyHdNEiip3wmxTgriPzEYETEn9Z6K3',
@@ -27,7 +27,9 @@ const ETH_IPFS_BRIDGES = [
 
 const ipfs = new IpfsClient({
   // repo: '/tmp/ipfs' + Math.random(),
-  Bootstrap: ETH_IPFS_BRIDGES,
+  config: {
+    Bootstrap: ETH_IPFS_BRIDGES,
+  }
 })
 ipfs.on('ready', start)
 
@@ -45,7 +47,6 @@ global.ipfs = ipfs
 function start() {
   console.log('ipfs ready!')
   // connect to eth-ipfs bridge nodes
-  ETH_IPFS_BRIDGES.map((address) => ipfs.swarm.connect(address))
   startApp({ provider, blockTracker })
 }
 
