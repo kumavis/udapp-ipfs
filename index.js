@@ -6,6 +6,7 @@ const EthQuery = require('eth-query')
 const EthStore = require('eth-store')
 const EthAbi = require('ethjs-abi')
 const EthBlockTracker = require('eth-block-tracker')
+const dagBin = require('ipld-raw')
 const setupRenderer = require('./setupRenderer')
 const exampleAbi = require('./token.json')
 
@@ -32,6 +33,10 @@ const ipfs = new IpfsClient({
 })
 ipfs.on('ready', start)
 
+// add bin codec for "base2"
+ipfs._ipldResolver.support.add('base2',
+  dagBin.resolver,
+  dagBin.util)
 
 const ethIpfsClient = createEthIpfsClient({ ipfs })
 const { engine, provider, blockTracker, cht, reqTracker } = ethIpfsClient

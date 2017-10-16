@@ -19,6 +19,7 @@
     "ethjs-abi": "^0.2.0",
     "hyperscript": "^1.4.7",
     "ipfs": "^0.26.0",
+    "ipld-raw": "^1.0.1",
     "metamascara": "^1.2.2",
     "obs-store": "^2.4.1",
     "treeify": "^1.0.1",
